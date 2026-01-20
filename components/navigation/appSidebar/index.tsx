@@ -74,7 +74,7 @@ export function AppSidebar() {
                         <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
                             <span className="text-primary-foreground text-sm font-bold">T</span>
                         </div>
-                        <h2 className="text-lg font-semibold">TodoList UTN</h2>
+                        <h2 className="text-lg font-semibold">Todo List - UTN</h2>
                     </div>
                 </div>
 

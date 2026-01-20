@@ -25,9 +25,9 @@ export function ProfileContainer() {
     }
 
     return (
-        <div className="container mx-auto max-w-4xl p-6 space-y-6">
+        <div className="container mx-auto max-w-7xl p-6 space-y-6">
             <ProfileHeader />
-            
+
             <AccountInfo
                 email={email}
                 username={username}
