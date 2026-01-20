@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { redirect, usePathname } from "next/navigation"
 import { LayoutDashboard, ListTodo, User, LogOut, MoonIcon, SunIcon, Mail } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -141,6 +141,10 @@ export function AppSidebar() {
                     <Button
                         variant="ghost"
                         className="w-full justify-start gap-3 text-destructive hover:text-destructive hover:bg-destructive/10 h-10"
+                        onClick={() => {
+                            localStorage.removeItem("token")
+                            redirect("/login") 
+                        }}
                     >
                         <LogOut className="h-4 w-4" />
                         Cerrar Sesión
