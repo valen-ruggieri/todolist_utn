@@ -2,11 +2,11 @@ import { Metadata } from "next";
 import { AppLayout } from "@/components/navigation/appLayout";
 
 export const metadata: Metadata = {
-    title: "Dashboard",
-    description: "Dashboard",
+    title: "Mi Perfil",
+    description: "Mi Perfil",
 };
 
-export default function DashboardLayout({
+export default function ProfileLayout({
     children,
 }: {
     children: React.ReactNode;

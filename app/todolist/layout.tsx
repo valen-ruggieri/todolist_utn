@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { AppLayout } from "@/components/navigation/appLayout";
 
 export const metadata: Metadata = {
     title: "Todolist",
@@ -10,9 +11,5 @@ export default function TodolistLayout({
 }: {
     children: React.ReactNode;
 }) {
-    return (
-        <section className="flex min-h-screen w-full flex-col items-center justify-center ">
-            {children}
-        </section>
-    );
+    return <AppLayout>{children}</AppLayout>;
 }
