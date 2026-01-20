@@ -11,7 +11,7 @@ export default function TodolistLayout({
     children: React.ReactNode;
 }) {
     return (
-        <section>
+        <section className="flex min-h-screen w-full flex-col items-center justify-center ">
             {children}
         </section>
     );
