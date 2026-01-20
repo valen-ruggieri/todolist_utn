@@ -1,7 +1,5 @@
- export default function DashboardPage() {
-  return (
-    <div>
-      <h1>Dashboard</h1>
-    </div>
-  );
+import { DashboardContainer } from "@/components/dashboard/dashboardContainer"
+
+export default function DashboardPage() {
+    return <DashboardContainer />
 }
