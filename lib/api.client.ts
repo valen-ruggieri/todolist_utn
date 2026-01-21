@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api"
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
 
 type ApiSuccess<T> = { success: true; data: T; meta?: unknown }
 type ApiError = { success: false; error: { message: string; code?: string; details?: unknown } }
