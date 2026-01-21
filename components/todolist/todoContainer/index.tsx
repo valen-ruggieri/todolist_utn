@@ -15,6 +15,8 @@ export function TodoContainer() {
     const [loading, setLoading] = React.useState(true)
     const [saving, setSaving] = React.useState(false)
     const [error, setError] = React.useState<string | null>(null)
+    const [actionLoadingIds, setActionLoadingIds] = React.useState<string[]>([])
+    const [animatedIds, setAnimatedIds] = React.useState<string[]>([])
 
     const {
         isRecording,
@@ -49,6 +51,9 @@ export function TodoContainer() {
             setError(null)
             const response = await createTodo({ text })
             setTodos((prevTodos) => [response.data, ...prevTodos])
+            // animar el nuevo elemento
+            setAnimatedIds((s) => [...s, response.data._id])
+            setTimeout(() => setAnimatedIds((s) => s.filter((id) => id !== response.data._id)), 700)
         } catch (error) {
             console.error("Error al crear todo:", error)
             setError("No se pudo crear la tarea.")
@@ -73,11 +78,17 @@ export function TodoContainer() {
         const updated = { ...todo, done: !todo.done }
         setTodos((s) => s.map((t) => (t._id === id ? updated : t)))
         try {
+            setActionLoadingIds((s) => [...s, id])
             await updateTodo(id, { completed: updated.done })
+            // animación al completar
+            setAnimatedIds((s) => [...s, id])
+            setTimeout(() => setAnimatedIds((s) => s.filter((x) => x !== id)), 400)
         } catch (err) {
             console.error("Error al actualizar tarea:", err)
             setTodos(prev)
             setError("No se pudo actualizar la tarea.")
+        } finally {
+            setActionLoadingIds((s) => s.filter((x) => x !== id))
         }
     }
 
@@ -85,11 +96,14 @@ export function TodoContainer() {
         const prev = todos
         setTodos((s) => s.filter((t) => t._id !== id))
         try {
+            setActionLoadingIds((s) => [...s, id])
             await deleteTodo(id)
         } catch (err) {
             console.error("Error al eliminar tarea:", err)
             setTodos(prev)
             setError("No se pudo eliminar la tarea.")
+        } finally {
+            setActionLoadingIds((s) => s.filter((x) => x !== id))
         }
     }
 
@@ -113,7 +127,7 @@ export function TodoContainer() {
             )}
             {saving && <p className="text-sm text-muted-foreground mt-2">Guardando tarea...</p>}
             {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
-            <TodoList todos={todos} loading={loading} onToggle={toggleTodo} onDelete={removeTodo} />
+            <TodoList todos={todos} loading={loading} onToggle={toggleTodo} onDelete={removeTodo} actionLoadingIds={actionLoadingIds} />
         </>
     )
 }

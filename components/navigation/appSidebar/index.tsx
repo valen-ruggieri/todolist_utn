@@ -89,7 +89,7 @@ export function AppSidebar() {
                                 <Button
                                     variant={isActive ? "secondary" : "ghost"}
                                     className={cn(
-                                        "w-full justify-start gap-3 h-10",
+                                        "w-full justify-start gap-3 h-10 cursor-pointer",
                                         isActive && "bg-secondary font-medium"
                                     )}
                                 >
@@ -104,7 +104,7 @@ export function AppSidebar() {
                 {/* User Section */}
                 <div className="border-t bg-muted/30 p-4 space-y-4">
                     {/* User Info */}
-                    <div className="flex items-center gap-3 p-3 rounded-lg bg-background border">
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-background border cursor-pointer">
                         <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
                             <span className="text-primary-foreground text-sm font-semibold">
                                 {userData.avatar}
@@ -120,7 +120,7 @@ export function AppSidebar() {
                     </div>
 
                     {/* Theme Toggle */}
-                    <div className="flex items-center justify-between p-2 rounded-lg bg-background border">
+                    <div className="flex items-center justify-between p-2 rounded-lg bg-background border cursor-pointer">
                         <span className="text-sm text-muted-foreground">Tema</span>
                         <Button
                             onClick={toggleTheme}
@@ -140,7 +140,7 @@ export function AppSidebar() {
                     {/* Logout */}
                     <Button
                         variant="ghost"
-                        className="w-full justify-start gap-3 text-destructive hover:text-destructive hover:bg-destructive/10 h-10"
+                        className="w-full justify-start gap-3 text-destructive hover:text-destructive hover:bg-destructive/10 h-10 cursor-pointer"
                         onClick={() => {
                             localStorage.removeItem("token")
                             redirect("/login") 
