@@ -27,7 +27,7 @@ import { Mic } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface TodoFormProps {
-    onAddTodo: (todo: Todo) => void
+    onAddTodo: (text: string) => Promise<void>
     onStartRecording: () => void
     recognitionAvailable: boolean
 }
@@ -40,19 +40,8 @@ export function TodoForm({ onAddTodo, onStartRecording, recognitionAvailable }: 
         },
     })
 
-    const onSubmit = (values: CreateTodoInput) => {
-        // Crear el objeto completo de la tarea y guardarlo solo en el array local
-        const newTodo: Todo = {
-            _id: `temp-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
-            text: values.text,
-            userId: "", // Se llenará cuando se haga el POST
-            done: false,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-        }
-
-        // Agregar al array local
-        onAddTodo(newTodo)
+    const onSubmit = async (values: CreateTodoInput) => {
+        await onAddTodo(values.text)
         form.reset()
     }
 

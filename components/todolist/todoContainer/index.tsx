@@ -2,15 +2,19 @@
 
 import * as React from "react"
 import { getTodos } from "@/services/todos.services"
+import { createTodo } from "@/services/todos.services"
 import type { Todo } from "@/lib/schemas/todo.schema"
 import { TodoForm } from "../todoForm"
 import { VoiceRecording } from "../voiceRecording"
 import { TodoList } from "../todoList"
+import { updateTodo, deleteTodo } from "@/services/todos.services"
 import { useVoiceRecognition } from "../voiceRecognition"
 
 export function TodoContainer() {
     const [todos, setTodos] = React.useState<Todo[]>([])
     const [loading, setLoading] = React.useState(true)
+    const [saving, setSaving] = React.useState(false)
+    const [error, setError] = React.useState<string | null>(null)
 
     const {
         isRecording,
@@ -29,6 +33,7 @@ export function TodoContainer() {
             setTodos(response.data)
         } catch (error) {
             console.error("Error al cargar todos:", error)
+            setError("No se pudieron cargar las tareas.")
         } finally {
             setLoading(false)
         }
@@ -38,26 +43,54 @@ export function TodoContainer() {
         loadTodos()
     }, [])
 
-    const addTodo = (newTodo: Todo) => {
-        setTodos((prevTodos) => [newTodo, ...prevTodos])
+    const addTodo = async (text: string) => {
+        try {
+            setSaving(true)
+            setError(null)
+            const response = await createTodo({ text })
+            setTodos((prevTodos) => [response.data, ...prevTodos])
+        } catch (error) {
+            console.error("Error al crear todo:", error)
+            setError("No se pudo crear la tarea.")
+        } finally {
+            setSaving(false)
+        }
     }
 
     const saveVoiceTodo = () => {
         if (!transcript.trim()) return
 
-        // Crear el objeto completo de la tarea y guardarlo solo en el array local
-        const newTodo: Todo = {
-            _id: `temp-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
-            text: transcript.trim(),
-            userId: "", // Se llenará cuando se haga el POST
-            done: false,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-        }
-
-        // Agregar al array local
-        addTodo(newTodo)
+        addTodo(transcript.trim())
         clearTranscript()
+    }
+
+    const toggleTodo = async (id: string) => {
+        const prev = todos
+        const idx = todos.findIndex((t) => t._id === id)
+        if (idx === -1) return
+        const todo = todos[idx]
+        // optimistic update
+        const updated = { ...todo, done: !todo.done }
+        setTodos((s) => s.map((t) => (t._id === id ? updated : t)))
+        try {
+            await updateTodo(id, { completed: updated.done })
+        } catch (err) {
+            console.error("Error al actualizar tarea:", err)
+            setTodos(prev)
+            setError("No se pudo actualizar la tarea.")
+        }
+    }
+
+    const removeTodo = async (id: string) => {
+        const prev = todos
+        setTodos((s) => s.filter((t) => t._id !== id))
+        try {
+            await deleteTodo(id)
+        } catch (err) {
+            console.error("Error al eliminar tarea:", err)
+            setTodos(prev)
+            setError("No se pudo eliminar la tarea.")
+        }
     }
 
     return (
@@ -78,7 +111,9 @@ export function TodoContainer() {
                     recognitionAvailable={recognitionAvailable}
                 />
             )}
-            <TodoList todos={todos} loading={loading} />
+            {saving && <p className="text-sm text-muted-foreground mt-2">Guardando tarea...</p>}
+            {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
+            <TodoList todos={todos} loading={loading} onToggle={toggleTodo} onDelete={removeTodo} />
         </>
     )
 }

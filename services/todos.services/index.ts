@@ -1,52 +1,60 @@
-import { getTodosResponseSchema, createTodoResponseSchema, createTodoSchema } from "@/lib/schemas/todo.schema"
-import type { GetTodosResponse, CreateTodoResponse, CreateTodoInput } from "@/lib/schemas/todo.schema"
+import { createTodoSchema } from "@/lib/schemas/todo.schema"
+import type { Todo, CreateTodoInput } from "@/lib/schemas/todo.schema"
+import { api } from "@/lib/api.client"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api"
+const API_PATH = "/todos"
 
-export async function getTodos(): Promise<GetTodosResponse> {
-  try {
-    const response = await fetch(`${API_URL}/todos`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    })
+type ApiTodo = {
+  _id?: string
+  id?: string
+  title?: string
+  completed?: boolean
+  done?: boolean
+  text?: string
+  createdAt?: string
+  updatedAt?: string
+}
 
-    if (!response.ok) {
-      throw new Error("Error al obtener los todos")
-    }
-
-    const data = await response.json()
-    return getTodosResponseSchema.parse(data)
-  } catch (error) {
-    console.error("Error en getTodos:", error)
-    throw error
+function mapApiTodo(apiTodo: ApiTodo): Todo {
+  const baseDate = apiTodo.createdAt || new Date().toISOString()
+  return {
+    _id: apiTodo._id || apiTodo.id || crypto.randomUUID(),
+    text: apiTodo.text || apiTodo.title || "",
+    userId: "",
+    done: apiTodo.done ?? apiTodo.completed ?? false,
+    createdAt: apiTodo.createdAt || baseDate,
+    updatedAt: apiTodo.updatedAt || baseDate,
   }
 }
 
-export async function createTodo(todo: CreateTodoInput): Promise<CreateTodoResponse> {
-  try {
-    // Validar el input
-    const validatedData = createTodoSchema.parse(todo)
+export async function getTodos(): Promise<{ success: boolean; data: Todo[] }> {
+  const data = await api.get<ApiTodo[]>(API_PATH, { requireAuth: true, retries: 1 })
+  const mapped = Array.isArray(data) ? data.map(mapApiTodo) : []
+  return { success: true, data: mapped }
+}
 
-    const response = await fetch(`${API_URL}/todos`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(validatedData),
-    })
+export async function createTodo(todo: CreateTodoInput): Promise<{ success: boolean; data: Todo }> {
+  const validatedData = createTodoSchema.parse(todo)
 
-    if (!response.ok) {
-      throw new Error("Error al crear el todo")
-    }
-
-    const data = await response.json()
-    return createTodoResponseSchema.parse(data)
-  } catch (error) {
-    console.error("Error en createTodo:", error)
-    throw error
+  const payload = {
+    title: validatedData.text,
+    completed: false,
   }
+
+  const data = await api.post<ApiTodo>(API_PATH, payload, { requireAuth: true })
+  return { success: true, data: mapApiTodo(data) }
+}
+
+export async function updateTodo(id: string, patch: Partial<{ title: string; completed: boolean }>): Promise<{ success: boolean; data: Todo }> {
+  const payload: Record<string, unknown> = {}
+  if (typeof patch.title === "string") payload.title = patch.title
+  if (typeof patch.completed === "boolean") payload.completed = patch.completed
+
+  const data = await api.put<ApiTodo>(`${API_PATH}/${id}`, payload, { requireAuth: true })
+  return { success: true, data: mapApiTodo(data) }
+}
+
+export async function deleteTodo(id: string): Promise<{ success: boolean; data: Todo }> {
+  const data = await api.del<ApiTodo>(`${API_PATH}/${id}`, { requireAuth: true })
+  return { success: true, data: mapApiTodo(data) }
 }

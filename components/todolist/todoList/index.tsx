@@ -9,15 +9,17 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
-import { Loader2 } from "lucide-react"
+import { Loader2, Check, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface TodoListProps {
     todos: Todo[]
     loading: boolean
+    onToggle?: (id: string) => void
+    onDelete?: (id: string) => void
 }
 
-export function TodoList({ todos, loading }: TodoListProps) {
+export function TodoList({ todos, loading, onToggle, onDelete }: TodoListProps) {
     return (
         <Card>
             <CardHeader>
@@ -63,6 +65,22 @@ export function TodoList({ todos, loading }: TodoListProps) {
                                             </p>
                                         </div>
                                         <div className="flex items-center gap-2">
+                                            <button
+                                                aria-label={todo.done ? "Marcar como pendiente" : "Marcar como completada"}
+                                                title={todo.done ? "Marcar como pendiente" : "Marcar como completada"}
+                                                className="p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800"
+                                                onClick={() => onToggle?.(todo._id)}
+                                            >
+                                                <Check className="h-4 w-4" />
+                                            </button>
+                                            <button
+                                                aria-label="Eliminar tarea"
+                                                title="Eliminar tarea"
+                                                className="p-2 rounded hover:bg-red-100 dark:hover:bg-red-900"
+                                                onClick={() => onDelete?.(todo._id)}
+                                            >
+                                                <Trash2 className="h-4 w-4 text-red-600 dark:text-red-400" />
+                                            </button>
                                             {todo.done ? (
                                                 <span className="text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded">
                                                     Completada
