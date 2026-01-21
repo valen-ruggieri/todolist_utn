@@ -1,5 +1,6 @@
 import type { LoginFormValues, RegisterFormValues } from "@/lib/schemas/auth.schema"
 import { api } from "@/lib/api.client"
+import { setStoredClient, clearStoredClient } from "@/lib/storage"
 
 const TOKEN_KEY = "todolist_token"
 
@@ -16,6 +17,11 @@ export function setStoredToken(token: string) {
 export function clearStoredToken() {
   if (typeof window === "undefined") return
   localStorage.removeItem(TOKEN_KEY)
+  try {
+    clearStoredClient()
+  } catch {
+    // ignore
+  }
 }
 
 function authHeaders(token?: string) {
@@ -37,6 +43,11 @@ export async function registerUser(values: RegisterFormValues) {
   }
 
   setStoredToken((data as any).token)
+  try {
+    setStoredClient((data as any).user)
+  } catch {
+    // ignore
+  }
   return data
 }
 
@@ -53,11 +64,22 @@ export async function loginUser(values: LoginFormValues) {
   }
 
   setStoredToken((data as any).token)
+  try {
+    setStoredClient((data as any).user)
+  } catch {
+    // ignore
+  }
   return data
 }
 
 export async function getProfile() {
   const data = await api.get<Record<string, unknown>>("/auth/profile", { requireAuth: true })
+  try {
+    // si el endpoint devuelve el usuario, guardarlo
+    setStoredClient(data as any)
+  } catch {
+    // ignore
+  }
   return data
 }
 
