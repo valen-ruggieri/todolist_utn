@@ -62,11 +62,13 @@ export function TodoContainer() {
         }
     }
 
-    const saveVoiceTodo = () => {
+    const saveVoiceTodo = async () => {
         if (!transcript.trim()) return
 
-        addTodo(transcript.trim())
+        const textToSave = transcript.trim()
+        stopRecording()
         clearTranscript()
+        await addTodo(textToSave)
     }
 
     const toggleTodo = async (id: string) => {
